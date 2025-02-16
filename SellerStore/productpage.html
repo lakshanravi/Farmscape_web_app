@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/fontawesome.min.css">
     <link rel="stylesheet" href="productpage.css">
     <link rel="shortcut icon" href="images/fav.png" type="image/svg" />
+    <style>
+        /* Added CSS for consistent image sizes */
+        .product-image {
+            width: 200px;  /* Set the desired width */
+            height: 200px;  /* Set the desired height */
+            object-fit: cover;  /* Ensure images cover the space without distortion */
+            border-radius: 8px;  /* Optional: rounded corners */
+        }
+    </style>
 </head>
 
 <body>
@@ -43,9 +52,12 @@
             <div class="product-info">
                 <p>Product information goes here. This is a brief description of the product.</p>
             </div>
-            <button class="contact-seller-button">Contact Seller</button>
+            <button class="contact-seller-button" onclick="contactSeller()">Contact Seller</button>
+            <div id="seller-contact-info" style="display:none; margin-top: 10px;"></div>
         </div>
     </div>
+    <div id="seller-contact-info" style="display:none;"></div>
+
 
     <!--------------------------------------------------FOOTER SECTION---------------------------------------------------------------->
     <footer class="footer">
@@ -91,47 +103,66 @@
     <script>
         async function fetchProducts() {
             try {
-                const response = await fetch('getProducts.php'); // Adjust the path as necessary
+                const response = await fetch('getProducts.php');
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const products = await response.json();
-                console.log(products); // Log products to see their structure
                 renderProducts(products);
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
         }
+
         function renderProducts(products) {
             const container = document.getElementById('product-container');
             products.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
-                productCard.onclick = () => showProductModal(product.id, product.image, product.description);
-                
-                // Ensure product.cost is a number
-                const cost = Number(product.cost); // Convert to number
+                productCard.onclick = () => showProductModal(product.id, product.image, product.description, product.user_id);
                 
                 productCard.innerHTML = `
                     <img src="${product.image}" alt="${product.title}" class="product-image">
                     <h2 class="product-title">${product.title}</h2>
-                    <p class="product-cost">${isNaN(cost) ? 'N/A' : cost.toFixed(2)}</p> <!-- Fallback for NaN -->
+                    <p class="product-cost">${product.cost.toFixed(2)}</p>
                     <button class="buy-button">Buy Product</button>
                 `;
                 container.appendChild(productCard);
             });
         }
         
-
-        function showProductModal(productId, image, description) {
-            document.getElementById('modal-product-title').innerText = productId; // Update with product title if available
+        function showProductModal(productId, image, description, userId) {
+            document.getElementById('modal-product-title').innerText = productId; 
             document.querySelector('.modal-images').innerHTML = `<img src="${image}" alt="Product" class="modal-image">`;
             document.querySelector('.product-info p').innerText = description;
+        
+            // Update Contact Seller button to pass seller's userId
+            document.querySelector('.contact-seller-button').onclick = () => contactSeller(userId);
+        
             document.getElementById('product-modal').style.display = 'block';
+        }
+        
+
+
+        function contactSeller(userId) {
+            console.log('Fetching contact for user ID:', userId);  // Debug log
+            fetch(`getSellerContact.php?user_id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const contactInfo = document.getElementById('seller-contact-info');
+                        contactInfo.innerHTML = `<p>Call Seller: <a href="tel:${data.telephone}">${data.telephone}</a></p>`;
+                        contactInfo.style.display = 'block';
+                    } else {
+                        console.error('Failed to fetch seller contact information:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error fetching seller contact:', error));
         }
 
         function closeModal() {
             document.getElementById('product-modal').style.display = 'none';
+            document.getElementById('seller-contact-info').style.display = 'none';
         }
 
         var navLinks = document.getElementById("navLinks");
@@ -142,7 +173,6 @@
             navLinks.style.right = "-200px";
         }
 
-        // Fetch products on page load
         window.onload = fetchProducts;
     </script>
 </body>

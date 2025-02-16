@@ -147,7 +147,7 @@ $conn->close();
                 <ul>
                     <li><a href="../index.html">Home</a></li>
                     <li><a href="../About_Us/About.html">About Us</a></li>
-                    <li><a href="../Product_Page/productpage.html">Sell & Buy</a></li>
+                    <li><a href="../SellerStore/productpage.html">Sell & Buy</a></li>
                     <li><a href="FarmerProfile.php">Profile</a></li>
                     <li><a href="vaccination_reminder.html">Notifications</a></li>
                 </ul>

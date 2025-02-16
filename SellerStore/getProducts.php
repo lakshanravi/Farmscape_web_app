@@ -28,6 +28,8 @@ if ($result->num_rows > 0) {
             'cost' => floatval($row['Price']), // Ensure 'cost' is a float
             'description' => $row['Description'],
             'image' =>  $row['Image'], 
+            'user_id' =>  $row['user_id'], 
+
         ];
     }
 }
